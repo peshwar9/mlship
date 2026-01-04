@@ -155,9 +155,21 @@ pytest tests/test_integration.py::TestPyTorchIntegration -v
 pytest tests/test_integration.py::TestHuggingFaceIntegration -v
 ```
 
-### CI/CD Integration
+### Pre-Push Checks
 
-Run before every push to ensure all frameworks work:
+**Recommended:** Run all CI checks locally before pushing to catch issues early:
+
+```bash
+./pre_push.sh
+```
+
+This runs:
+- ✅ Black formatting check
+- ✅ Ruff linting
+- ✅ MyPy type checking
+- ✅ All tests
+
+**Manual checks:**
 
 ```bash
 # Quick check
@@ -165,6 +177,12 @@ pytest tests/test_integration.py --tb=short
 
 # Full check with coverage
 pytest --cov=shipml --cov-report=term-missing
+
+# Format check only
+black --check shipml/ tests/
+
+# Lint check only
+ruff check shipml/ tests/
 ```
 
 ### GitHub Actions (Automated Testing)
