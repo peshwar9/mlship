@@ -141,12 +141,21 @@ def create_app(model: Any, loader: ModelLoader, model_name: str, pipeline: Any =
                 # Preprocess
                 processed_input = pipeline.preprocess(request_data)
 
-                # Run prediction (direct model call)
-                raw_output = (
-                    model(processed_input)
-                    if callable(model)
-                    else loader.predict(model, processed_input)
-                )
+                # Run prediction - call model directly, bypassing loader validation
+                if isinstance(model, dict) and "pipeline" in model:
+                    # HuggingFace model - call pipeline directly
+                    raw_output = model["pipeline"](processed_input)
+                elif callable(model):
+                    # PyTorch/TensorFlow - call model directly
+                    raw_output = model(processed_input)
+                else:
+                    # Sklearn or other - model.predict()
+                    import numpy as np
+
+                    X = np.array(processed_input)
+                    if X.ndim == 1:
+                        X = X.reshape(1, -1)
+                    raw_output = model.predict(X)
 
                 # Postprocess
                 if isinstance(raw_output, dict) and "model_name" not in raw_output:
