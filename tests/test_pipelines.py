@@ -140,7 +140,10 @@ class TestSklearnPipeline:
         """Test /predict endpoint with pipeline."""
         client = TestClient(sklearn_app_with_pipeline)
         response = client.post(
-            "/predict", json={"features": [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0]}
+            "/predict",
+            json={
+                "features": [100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0]
+            },
         )
 
         if response.status_code != 200:
