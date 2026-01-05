@@ -261,44 +261,101 @@ shipml serve model.pkl --reload
 
 ### Custom Preprocessing/Postprocessing Pipelines
 
-For advanced use cases like text tokenization, feature normalization, or custom output formatting, you can define a custom pipeline:
+**What are pipelines?**
 
-**1. Create a pipeline class:**
+By default, ShipML expects models to receive data in a standard format and returns predictions as-is. But real-world ML deployments often need:
+- **Preprocessing**: Normalization, feature engineering, text extraction, scaling
+- **Postprocessing**: Custom formatting, thresholds, business logic, metadata
+
+Pipelines let you inject custom logic before and after model prediction without modifying ShipML's code.
+
+**How it works:**
+
+```
+Without Pipeline:
+User Request → Validate → Model.predict() → Response
+
+With Pipeline:
+User Request → Pipeline.preprocess() → Model.predict() → Pipeline.postprocess() → Response
+```
+
+**Why it differs by framework:**
+
+| Framework | Input Type | Preprocessing Example | Notes |
+|-----------|-----------|----------------------|-------|
+| **Sklearn** | Numpy arrays | Normalization, scaling | Model is simple `.predict()` method |
+| **PyTorch** | Tensors | Custom transforms, device placement | Model is callable |
+| **HuggingFace** | Raw text | Extract text from request | Pipeline handles tokenization internally! |
+| **TensorFlow** | Tensors | Reshaping, normalization | Model is callable |
+
+**Example 1: Sklearn with normalization**
 
 ```python
 # my_pipeline.py
 from shipml.pipeline import Pipeline
 import numpy as np
 
-class MyPipeline(Pipeline):
+class NormalizationPipeline(Pipeline):
     def __init__(self, model_path):
         super().__init__(model_path)
-        # Initialize tokenizers, scalers, etc.
+        # Load normalization parameters
+        self.mean = np.array([50.0, 100.0])
+        self.std = np.array([10.0, 20.0])
 
     def preprocess(self, request_data):
-        """Transform API request -> model input"""
-        # Example: normalize features
+        """Normalize features before prediction"""
         features = np.array(request_data["features"])
         return (features - self.mean) / self.std
 
     def postprocess(self, model_output):
-        """Transform model output -> API response"""
-        # Example: add confidence scores
+        """Add metadata to response"""
+        model_output["preprocessing"] = "normalized"
+        return model_output
+```
+
+**Example 2: HuggingFace text processing**
+
+```python
+# sentiment_pipeline.py
+from shipml.pipeline import Pipeline
+
+class SentimentPipeline(Pipeline):
+    def preprocess(self, request_data):
+        """Extract text - HuggingFace pipeline handles tokenization!"""
+        return request_data.get("text", "")
+
+    def postprocess(self, model_output):
+        """Format output nicely"""
+        result = model_output[0] if isinstance(model_output, list) else model_output
         return {
-            "prediction": model_output["prediction"],
-            "confidence": model_output["probability"]
+            "sentiment": result["label"],
+            "confidence": round(result["score"], 4)
         }
 ```
 
-**2. Serve with your pipeline:**
+**Usage:**
 
 ```bash
-shipml serve model.pkl --pipeline my_pipeline.MyPipeline
+# Serve with custom pipeline
+shipml serve model.pkl --pipeline my_pipeline.NormalizationPipeline
+
+# Test with custom input format
+curl -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{"features": [100, 200]}'
 ```
 
-**Examples:**
+**Real-world use cases:**
+- 🔤 Text extraction and custom formatting for NLP models
+- 📊 Feature normalization matching training-time preprocessing
+- 🎯 Business logic (thresholds, alerts, A/B testing)
+- 🔄 Multi-model ensembles with voting logic
+- 📝 Logging, monitoring, and audit trails
+
+**See working examples:**
 - `examples/pipelines/sentiment_pipeline.py` - HuggingFace text processing
 - `examples/pipelines/sklearn_normalization.py` - Feature normalization
+- `examples/pipelines/simple_test.py` - Minimal template
 
 ---
 
@@ -481,7 +538,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 - [x] TensorFlow support
 - [x] Hugging Face support
 - [x] Cross-platform CI/CD testing
-- [ ] Custom preprocessing/postprocessing pipelines (🚧 in progress)
+- [x] Custom preprocessing/postprocessing pipelines
 - [ ] XGBoost support
 - [ ] LightGBM support
 - [ ] GPU inference
