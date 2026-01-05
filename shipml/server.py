@@ -38,21 +38,35 @@ def create_app(model: Any, loader: ModelLoader, model_name: str, pipeline: Any =
     # Get model metadata once at startup
     metadata = loader.get_metadata(model)
 
-    # Create framework-specific request model
-    framework = metadata.get("framework", "")
-    if framework == "huggingface-transformers":
-        # Text-based input for HuggingFace models
-        from pydantic import BaseModel, Field
-        from typing import Union, List
+    # Create request model based on whether pipeline is provided
+    if pipeline:
+        # Custom pipeline - accept any JSON dict
+        from pydantic import RootModel
+        from typing import Dict, Any
 
-        class PredictRequest(BaseModel):
-            features: Union[str, List[str]] = Field(
-                ..., description="Text input for prediction", examples=["This product is amazing!"]
-            )
+        class PredictRequest(RootModel[Dict[str, Any]]):
+            """Flexible request model for custom pipelines - accepts any JSON."""
+
+            root: Dict[str, Any]
 
     else:
-        # Numeric input for sklearn/pytorch/tensorflow
-        from shipml.models import PredictRequest
+        # No pipeline - use framework-specific request models
+        framework = metadata.get("framework", "")
+        if framework == "huggingface-transformers":
+            # Text-based input for HuggingFace models
+            from pydantic import BaseModel, Field
+            from typing import Union, List
+
+            class PredictRequest(BaseModel):
+                features: Union[str, List[str]] = Field(
+                    ...,
+                    description="Text input for prediction",
+                    examples=["This product is amazing!"],
+                )
+
+        else:
+            # Numeric input for sklearn/pytorch/tensorflow
+            from shipml.models import PredictRequest
 
     @app.get("/", include_in_schema=False)
     async def root():
@@ -121,7 +135,8 @@ def create_app(model: Any, loader: ModelLoader, model_name: str, pipeline: Any =
         try:
             if pipeline:
                 # Use custom pipeline
-                request_data = request.dict()
+                # RootModel stores data in .root attribute
+                request_data = request.root if hasattr(request, "root") else request.dict()
 
                 # Preprocess
                 processed_input = pipeline.preprocess(request_data)
