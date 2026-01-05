@@ -87,6 +87,10 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = "-v --cov=shipml --cov-report=term-missing"
+filterwarnings = [
+    "ignore::FutureWarning:keras.*",
+    "ignore::DeprecationWarning:keras.*",
+]
 
 [tool.mypy]
 python_version = "3.8"
