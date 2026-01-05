@@ -1,7 +1,7 @@
 """Base interface for model loaders."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Union
+from typing import Any, Dict
 from pathlib import Path
 
 
