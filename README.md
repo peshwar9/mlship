@@ -21,7 +21,7 @@ Deploy your machine learning models locally in seconds—no Docker, no YAML, no 
 - ✅ **Multi-framework** - Supports scikit-learn, PyTorch, TensorFlow, Hugging Face
 - ✅ **Platform agnostic** - Works on macOS, Windows, and Linux
 - ✅ **Fast** - Deploy in seconds, predictions in milliseconds
-- ✅ **Production-ready** - Input validation, error handling, health checks
+- ✅ **Demo-ready** - Input validation, error handling, health checks for local testing
 
 ---
 
@@ -31,20 +31,20 @@ Deploy your machine learning models locally in seconds—no Docker, no YAML, no 
 
 **macOS / Linux:**
 ```bash
-# Using pip
+# Using pip (recommended)
 pip install shipml
 
-# Using uv (recommended - faster)
+# Using uv (faster alternative)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 uv pip install shipml
 ```
 
 **Windows:**
 ```powershell
-# Using pip
+# Using pip (recommended)
 pip install shipml
 
-# Using uv (recommended)
+# Using uv (faster alternative)
 powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 uv pip install shipml
 ```
@@ -439,11 +439,12 @@ MIT License - see [LICENSE](LICENSE) for details.
 - [x] PyTorch support
 - [x] TensorFlow support
 - [x] Hugging Face support
+- [x] Cross-platform CI/CD testing
+- [ ] Custom preprocessing/postprocessing pipelines (🚧 in progress)
 - [ ] XGBoost support
 - [ ] LightGBM support
 - [ ] GPU inference
 - [ ] Batch prediction optimization
-- [ ] Model preprocessing pipelines
 - [ ] Docker deployment option
 
 ---
