@@ -4,17 +4,134 @@ Get your ML models serving in minutes.
 
 ## Installation
 
+### Prerequisites
+
+**Python Version Requirements:**
+- ✅ **Python 3.11 or 3.12** (Recommended)
+- ❌ **Python 3.13** does NOT work (PyTorch and TensorFlow don't support it yet)
+- ❌ **Python 3.10 and below** not recommended (limited support)
+
+### Step 1: Check Your Python Version
+
 ```bash
-pip install mlship
+# Check your Python version
+python3 --version
 ```
 
-That's it! No Docker, no configuration files, no setup.
+**If you have Python 3.13:**
+You need to install Python 3.12 or 3.11.
+
+**macOS:**
+```bash
+# Install Python 3.12 using Homebrew
+brew install python@3.12
+
+# Verify installation
+python3.12 --version
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+# Add deadsnakes PPA
+sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt update
+
+# Install Python 3.12
+sudo apt install python3.12 python3.12-venv
+
+# Verify installation
+python3.12 --version
+```
+
+**Windows:**
+Download Python 3.12 from [python.org/downloads](https://www.python.org/downloads/) and install it.
+
+### Step 2: Create Virtual Environment
+
+**Always use a virtual environment** to avoid conflicts with other Python projects:
+
+```bash
+# Create a directory for your project
+mkdir my-mlship-project
+cd my-mlship-project
+
+# Create virtual environment with Python 3.12
+python3.12 -m venv venv
+
+# If python3.12 is your default Python 3:
+python3 -m venv venv
+
+# Activate the virtual environment
+# macOS/Linux:
+source venv/bin/activate
+
+# Windows:
+venv\Scripts\activate
+```
+
+After activation, you should see `(venv)` in your terminal prompt.
+
+### Step 3: Install mlship
+
+```bash
+# Basic installation (for sklearn models)
+pip install mlship
+
+# For HuggingFace models (includes PyTorch)
+pip install 'mlship[huggingface]'
+
+# For all frameworks
+pip install 'mlship[all]'
+```
+
+**Note:** On **zsh** (macOS default), you must quote the brackets: `'mlship[huggingface]'`
+
+### Step 4: Verify Installation
+
+```bash
+# Check mlship version
+mlship --version
+
+# Should output: mlship version 0.1.x
+
+# Check help
+mlship --help
+```
+
+**Test with a simple model:**
+
+```bash
+# Install scikit-learn
+pip install scikit-learn
+
+# Create a test model
+python -c "
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import make_classification
+import joblib
+
+X, y = make_classification(n_samples=100, n_features=4, random_state=42)
+model = RandomForestClassifier(random_state=42)
+model.fit(X, y)
+joblib.dump(model, 'test_model.pkl')
+print('✅ Test model created: test_model.pkl')
+"
+
+# Serve the model
+mlship serve test_model.pkl
+```
+
+Visit http://localhost:8000/docs to see the interactive API documentation.
+
+**If everything works, you're ready to go!** 🎉
 
 ---
 
 ## HuggingFace Hub Models
 
 The fastest way to try mlship is with HuggingFace Hub models (no model files needed).
+
+**Note:** Make sure you installed with `pip install 'mlship[huggingface]'` to get PyTorch support.
 
 ### Example 1: Sentiment Analysis
 
