@@ -606,6 +606,23 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
+## Documentation
+
+mlship includes focused documentation for different audiences:
+
+| Document | Audience | What's Inside |
+|----------|----------|---------------|
+| **[README.md](README.md)** | End users | Installation, quick start, usage examples, API reference |
+| **[CONTRIBUTING.md](CONTRIBUTING.md)** | Contributors | Development setup, testing, code style, PR process |
+| **[ARCHITECTURE.md](ARCHITECTURE.md)** | Developers | Design philosophy, technical decisions, when to use mlship vs production tools |
+| **[PUBLISHING.md](PUBLISHING.md)** | Maintainers | How to publish releases to PyPI (internal use) |
+
+**New to mlship?** Start with the Quick Start section above.
+**Want to contribute?** Read [CONTRIBUTING.md](CONTRIBUTING.md).
+**Curious about design?** Check [ARCHITECTURE.md](ARCHITECTURE.md).
+
+---
+
 ## Support
 
 - 📖 [Documentation](https://github.com/prabhueshwarla/shipml#readme)
