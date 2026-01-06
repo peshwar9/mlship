@@ -51,28 +51,72 @@ uv pip install mlship
 
 ### Your First API
 
+**Step 1: Install dependencies**
+
 ```bash
-# 1. Train a model (or use an existing one)
-python
->>> from sklearn.ensemble import RandomForestClassifier
->>> from sklearn.datasets import make_classification
->>> import joblib
->>> X, y = make_classification(n_samples=100, n_features=10, random_state=42)
->>> model = RandomForestClassifier()
->>> model.fit(X, y)
->>> joblib.dump(model, 'model.pkl')
->>> exit()
+# Install mlship and scikit-learn
+pip install mlship scikit-learn joblib
+```
 
-# 2. Serve it
+**Step 2: Create and train a model**
+
+Create a file `train_model.py`:
+
+```python
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import make_classification
+import joblib
+
+# Train a simple model
+X, y = make_classification(n_samples=100, n_features=4, random_state=42)
+model = RandomForestClassifier(random_state=42)
+model.fit(X, y)
+
+# Save it
+joblib.dump(model, 'model.pkl')
+print('✅ Model saved to model.pkl')
+```
+
+Run it:
+```bash
+python train_model.py
+```
+
+**Step 3: Serve it**
+
+```bash
 mlship serve model.pkl
+```
 
-# 3. Test it (in another terminal)
+You'll see:
+```
+🚀 mlship
+   Loading model: model.pkl
+
+🔍 Detecting framework... ✓ sklearn
+📦 Loading model... ✓ Success
+
+📊 Model Information:
+   Name:       model
+   Framework:  sklearn
+   Features:   4
+
+🎉 Server starting!
+   URL:      http://127.0.0.1:8000
+   API Docs: http://127.0.0.1:8000/docs
+```
+
+**Step 4: Test it** (in another terminal)
+
+```bash
 curl -X POST http://localhost:8000/predict \
   -H "Content-Type: application/json" \
-  -d '{"features": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]}'
+  -d '{"features": [1.0, 2.0, 3.0, 4.0]}'
+```
 
-# Response:
-# {"prediction": 0, "probability": 0.87, "model_name": "model"}
+Response:
+```json
+{"prediction": 0, "probability": 0.87, "model_name": "model"}
 ```
 
 ### View Interactive Docs

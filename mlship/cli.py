@@ -1,5 +1,6 @@
 """Command-line interface for mlship."""
 
+import sys
 from pathlib import Path
 
 import click
@@ -108,7 +109,6 @@ def serve(model_file: str, port: int, host: str, name: str, pipeline: str, reloa
             click.echo("🔧 Loading custom pipeline...", nl=False)
             try:
                 import importlib
-                import sys
                 from pathlib import Path as PathLib
 
                 # Add current directory to Python path so users can import local files

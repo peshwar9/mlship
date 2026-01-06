@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mlship"
-version = "0.1.0"
+version = "0.1.1"
 description = "Turn ML models into APIs with one command"
 authors = [{name = "Prabhu Eshwarla", email = "dev@peshwarla.com"}]
 license = {text = "MIT"}
