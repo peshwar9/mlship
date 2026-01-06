@@ -276,12 +276,13 @@ class SimpleModel(nn.Module):
     def forward(self, x):
         return self.fc(x)
 
-# Create and save model
+# Create and train model
 model = SimpleModel()
 model.eval()
 
-# Save FULL model (not just state_dict)
-torch.save(model, 'pytorch_model.pt')
+# Save using TorchScript (recommended for custom models)
+scripted_model = torch.jit.script(model)
+torch.jit.save(scripted_model, 'pytorch_model.pt')
 print('✅ Model saved to pytorch_model.pt')
 ```
 
@@ -426,6 +427,8 @@ mlship serve model.pkl --name "fraud-detector"
 | **PyTorch** | `pip install mlship torch` | `mlship serve model.pt` |
 | **TensorFlow** | `pip install mlship tensorflow` | `mlship serve model.h5` |
 | **HuggingFace Hub** | `pip install mlship transformers` | `mlship serve model-id --source huggingface` |
+
+**Note on PyTorch:** For custom models, use TorchScript format (`torch.jit.save()`) for best compatibility. See Example 4 above.
 
 Or install everything:
 ```bash

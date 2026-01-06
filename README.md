@@ -65,6 +65,8 @@ curl -X POST http://localhost:8000/predict \
 | **HuggingFace (local)** | Model directory | `mlship serve ./sentiment-model/` |
 | **HuggingFace (Hub)** | Model ID | `mlship serve bert-base-uncased --source huggingface` |
 
+**Note:** For custom PyTorch models, use TorchScript format (`torch.jit.save()`) for best compatibility.
+
 ---
 
 ## HuggingFace Hub Support
@@ -220,6 +222,7 @@ mlship is the **only zero-code tool** that supports sklearn, PyTorch, TensorFlow
 
 - ✅ **Multi-framework support** - sklearn, PyTorch, TensorFlow, HuggingFace
 - ✅ **HuggingFace Hub integration** - Serve models directly from Hub with `--source huggingface`
+- ✅ **PyTorch TorchScript support** - Full support for custom PyTorch models via TorchScript
 - ✅ **Zero-code deployment** - One command to serve any model
 - ✅ **Auto-generated REST API** - With interactive Swagger docs
 - ✅ **Custom pipelines** - Preprocessing/postprocessing support

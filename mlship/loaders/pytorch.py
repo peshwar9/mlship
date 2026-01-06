@@ -19,6 +19,15 @@ class PyTorchLoader(ModelLoader):
         try:
             import torch
 
+            # Try loading as TorchScript first (recommended format)
+            try:
+                model = torch.jit.load(model_path, map_location="cpu")
+                model.eval()
+                return model
+            except Exception:
+                # Not a TorchScript model, try regular pickle format
+                pass
+
             # Load model (CPU only for now)
             # weights_only=False is needed for custom model classes
             model = torch.load(model_path, map_location="cpu", weights_only=False)
@@ -28,11 +37,12 @@ class PyTorchLoader(ModelLoader):
                 # If saved as state dict, we need the model architecture
                 # This is a limitation - user needs to provide full model
                 raise ModelLoadError(
-                    "Model saved as state_dict only. ShipML needs the full model.\n\n"
-                    "Please save your model using:\n"
-                    "  torch.save(model, 'model.pt')  # Save full model\n\n"
-                    "Instead of:\n"
-                    "  torch.save(model.state_dict(), 'model.pt')  # State dict only"
+                    "Model saved as state_dict only. mlship needs the full model.\n\n"
+                    "Recommended: Use TorchScript format (works with custom models):\n"
+                    "  scripted = torch.jit.script(model)\n"
+                    "  torch.jit.save(scripted, 'model.pt')\n\n"
+                    "Or save the full model (may have import issues):\n"
+                    "  torch.save(model, 'model.pt')"
                 )
 
             # Set to eval mode
@@ -44,10 +54,27 @@ class PyTorchLoader(ModelLoader):
         except ImportError:
             raise ModelLoadError(
                 "PyTorch is not installed.\n\n"
-                "Install with: uv pip install torch\n"
-                "Or: uv pip install mlship[pytorch]"
+                "Install with: pip install torch\n"
+                "Or: pip install mlship[pytorch]"
             )
         except Exception as e:
+            error_msg = str(e)
+
+            # Check for common pickling errors
+            if "Can't get attribute" in error_msg or "No module named" in error_msg:
+                raise ModelLoadError(
+                    f"Failed to load PyTorch model: {e}\n\n"
+                    "This error usually means the model was saved with torch.save() from a script.\n"
+                    "Custom model classes can't be loaded this way.\n\n"
+                    "✅ RECOMMENDED FIX - Use TorchScript:\n"
+                    "  scripted = torch.jit.script(model)\n"
+                    "  torch.jit.save(scripted, 'model.pt')\n\n"
+                    "Or use torch.jit.trace() if your model isn't compatible with script:\n"
+                    "  example_input = torch.randn(1, input_size)\n"
+                    "  traced = torch.jit.trace(model, example_input)\n"
+                    "  torch.jit.save(traced, 'model.pt')"
+                )
+
             raise ModelLoadError(f"Failed to load PyTorch model: {e}")
 
     def predict(
