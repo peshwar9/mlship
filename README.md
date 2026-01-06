@@ -134,10 +134,29 @@ Read [WHY_MLSHIP.md](WHY_MLSHIP.md) for detailed positioning.
 
 ## Documentation
 
-- **[QUICKSTART.md](QUICKSTART.md)** - Hands-on getting started guide
-- **[WHY_MLSHIP.md](WHY_MLSHIP.md)** - Positioning and comparisons
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development guide
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Technical design
+- **[QUICKSTART.md](QUICKSTART.md)** - 🚀 **Start here!** Complete hands-on guide with:
+  - HuggingFace Hub examples (sentiment analysis, GPT-2, Q&A)
+  - Local model examples (sklearn, PyTorch, TensorFlow)
+  - Training code, curl commands, and expected responses
+  - Perfect for first-time users and students
+
+- **[WHY_MLSHIP.md](WHY_MLSHIP.md)** - 🎯 **Understanding mlship's unique value**
+  - Comparison with transformers-serve, vLLM, Ollama, BentoML
+  - Multi-framework advantage explained
+  - Target audience and use cases
+  - When to use mlship vs alternatives
+
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - 🛠️ **For contributors**
+  - Development setup and workflow
+  - Running tests and code style
+  - Custom pipeline development
+  - How to submit pull requests
+
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - 🏗️ **Technical deep dive**
+  - Design decisions and philosophy
+  - Performance optimizations
+  - Framework detection system
+  - Internal architecture
 
 ---
 
