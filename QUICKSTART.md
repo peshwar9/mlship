@@ -125,6 +125,24 @@ print('✅ Test model created: test_model.pkl')
 mlship serve test_model.pkl
 ```
 
+The server will start on http://localhost:8000. In a new terminal, test it:
+
+```bash
+# Test prediction
+curl -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{"features": [1.0, 2.0, 3.0, 4.0]}'
+```
+
+**Expected response:**
+```json
+{
+  "prediction": 1,
+  "probability": 0.85,
+  "model_name": "test_model"
+}
+```
+
 Visit http://localhost:8000/docs to see the interactive API documentation.
 
 **If everything works, you're ready to go!** 🎉
