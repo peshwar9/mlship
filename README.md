@@ -11,20 +11,18 @@ Deploy your machine learning models locally in seconds—no Docker, no YAML, no 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
-> **Why mlship?** See our [positioning document](WHY_MLSHIP.md) for how mlship compares to transformers-serve, vLLM, Ollama, and BentoML.
+> **Why mlship?** Read [WHY_MLSHIP.md](WHY_MLSHIP.md) to see how mlship compares to transformers-serve, vLLM, Ollama, and BentoML.
 
 ---
 
 ## Features
 
 - ✅ **One-command deployment** - No configuration needed
-- ✅ **Works offline** - Zero internet dependency after installation
+- ✅ **Multi-framework** - sklearn, PyTorch, TensorFlow, HuggingFace (local + Hub)
+- ✅ **HuggingFace Hub** - Serve models directly from Hub without downloading
 - ✅ **Auto-generated API** - REST API with interactive docs
-- ✅ **Multi-framework** - Supports scikit-learn, PyTorch, TensorFlow, **and HuggingFace** (local + Hub)
-- ✅ **HuggingFace Hub integration** - Serve models directly from Hub without downloading
-- ✅ **Platform agnostic** - Works on macOS, Windows, and Linux
+- ✅ **Works offline** - Zero internet dependency after installation
 - ✅ **Fast** - Deploy in seconds, predictions in milliseconds
-- ✅ **Demo-ready** - Input validation, error handling, health checks for local testing
 
 ---
 
@@ -50,382 +48,113 @@ curl -X POST http://localhost:8000/predict \
   -d '{"features": "This product is amazing!"}'
 ```
 
-**📖 See [QUICKSTART.md](QUICKSTART.md) for complete examples** with:
+**📖 See [QUICKSTART.md](QUICKSTART.md)** for complete hands-on examples with:
 - HuggingFace models (sentiment, GPT-2, Q&A)
 - Local models (sklearn, PyTorch, TensorFlow)
-- Full curl commands and expected responses
+- Training code, curl commands, and expected responses
 
 ---
 
 ## Supported Frameworks
 
-| Framework | File Extensions / Source | Example |
-|-----------|-------------------------|---------|
-| **Scikit-learn** | `.pkl`, `.joblib` | `mlship serve model.pkl` |
+| Framework | File Format | Example |
+|-----------|------------|---------|
+| **scikit-learn** | `.pkl`, `.joblib` | `mlship serve model.pkl` |
 | **PyTorch** | `.pt`, `.pth` | `mlship serve model.pt` |
-| **TensorFlow/Keras** | `.h5`, `.keras`, `SavedModel/` | `mlship serve model.h5` |
-| **Hugging Face (Local)** | Model directory | `mlship serve sentiment-model/` |
-| **Hugging Face (Hub)** | Model ID | `mlship serve bert-base-uncased --source huggingface` |
-| **XGBoost** | `.json`, `.pkl` | Coming soon |
-| **LightGBM** | `.txt`, `.pkl` | Coming soon |
+| **TensorFlow** | `.h5`, `.keras`, SavedModel | `mlship serve model.h5` |
+| **HuggingFace (local)** | Model directory | `mlship serve ./sentiment-model/` |
+| **HuggingFace (Hub)** | Model ID | `mlship serve bert-base-uncased --source huggingface` |
 
 ---
 
 ## HuggingFace Hub Support
 
-Serve models directly from HuggingFace Hub without downloading them first:
+Serve models directly from HuggingFace Hub:
 
 ```bash
-# Serve a text classification model
+mlship serve gpt2 --source huggingface
 mlship serve distilbert-base-uncased-finetuned-sst-2-english --source huggingface
-
-# Serve GPT-2 for text generation
-mlship serve gpt2 --source huggingface --port 5000
-
-# Serve any HuggingFace model
-mlship serve <model-id> --source huggingface
 ```
 
-**What happens:**
-- mlship downloads the model on first use (with progress bars)
-- Model is cached locally in `~/.cache/huggingface/` for faster subsequent loads
-- No manual model download or setup required
-
-**Test it:**
-```bash
-curl -X POST http://localhost:8000/predict \
-  -H "Content-Type: application/json" \
-  -d '{"features": "This product is amazing!"}'
-```
-
-Response:
-```json
-{
-  "prediction": "POSITIVE",
-  "probability": 0.9998,
-  "model_name": "distilbert-base-uncased-finetuned-sst-2-english"
-}
-```
-
-**Note:** You need transformers installed:
-```bash
-pip install mlship[huggingface]
-# or
-pip install mlship transformers
-```
+Models are downloaded on first use and cached locally. See [QUICKSTART.md](QUICKSTART.md) for more examples.
 
 ---
 
 ## API Endpoints
 
-Every model gets three endpoints automatically:
+Every model automatically gets:
 
 - **POST `/predict`** - Make predictions
 - **GET `/health`** - Health check
 - **GET `/info`** - Model metadata
-- **GET `/docs`** - Interactive API documentation (Swagger UI)
+- **GET `/docs`** - Interactive Swagger UI documentation
 
-See [QUICKSTART.md](QUICKSTART.md) for detailed examples and curl commands.
+Examples in [QUICKSTART.md](QUICKSTART.md).
 
 ---
 
-## Advanced Features
+## Advanced Usage
 
 ```bash
 # Custom port
 mlship serve model.pkl --port 5000
 
-# Development mode (auto-reload)
+# Development mode (auto-reload on code changes)
 mlship serve model.pkl --reload
 
 # Custom model name
 mlship serve model.pkl --name "fraud-detector"
+
+# Custom preprocessing/postprocessing
+mlship serve model.pkl --pipeline my_module.MyPipeline
 ```
 
-### Custom Pipelines
-
-**What are pipelines?**
-
-By default, mlship expects models to receive data in a standard format and returns predictions as-is. But real-world ML deployments often need:
-- **Preprocessing**: Normalization, feature engineering, text extraction, scaling
-- **Postprocessing**: Custom formatting, thresholds, business logic, metadata
-
-Pipelines let you inject custom logic before and after model prediction without modifying mlship's code.
-
-**How it works:**
-
-```
-Without Pipeline:
-User Request → Validate → Model.predict() → Response
-
-With Pipeline:
-User Request → Pipeline.preprocess() → Model.predict() → Pipeline.postprocess() → Response
-```
-
-**Why it differs by framework:**
-
-| Framework | Input Type | Preprocessing Example | Notes |
-|-----------|-----------|----------------------|-------|
-| **Sklearn** | Numpy arrays | Normalization, scaling | Model is simple `.predict()` method |
-| **PyTorch** | Tensors | Custom transforms, device placement | Model is callable |
-| **HuggingFace** | Raw text | Extract text from request | Pipeline handles tokenization internally! |
-| **TensorFlow** | Tensors | Reshaping, normalization | Model is callable |
-
-**Example 1: Sklearn with normalization**
-
-```python
-# my_pipeline.py
-from mlship.pipeline import Pipeline
-import numpy as np
-
-class NormalizationPipeline(Pipeline):
-    def __init__(self, model_path):
-        super().__init__(model_path)
-        # Load normalization parameters
-        self.mean = np.array([50.0, 100.0])
-        self.std = np.array([10.0, 20.0])
-
-    def preprocess(self, request_data):
-        """Normalize features before prediction"""
-        features = np.array(request_data["features"])
-        return (features - self.mean) / self.std
-
-    def postprocess(self, model_output):
-        """Add metadata to response"""
-        model_output["preprocessing"] = "normalized"
-        return model_output
-```
-
-**Example 2: HuggingFace text processing**
-
-```python
-# sentiment_pipeline.py
-from mlship.pipeline import Pipeline
-
-class SentimentPipeline(Pipeline):
-    def preprocess(self, request_data):
-        """Extract text - HuggingFace pipeline handles tokenization!"""
-        return request_data.get("text", "")
-
-    def postprocess(self, model_output):
-        """Format output nicely"""
-        result = model_output[0] if isinstance(model_output, list) else model_output
-        return {
-            "sentiment": result["label"],
-            "confidence": round(result["score"], 4)
-        }
-```
-
-**Usage:**
-
-```bash
-# Serve with custom pipeline
-mlship serve model.pkl --pipeline my_pipeline.NormalizationPipeline
-
-# Test with custom input format
-curl -X POST http://localhost:8000/predict \
-  -H "Content-Type: application/json" \
-  -d '{"features": [100, 200]}'
-```
-
-**Real-world use cases:**
-- 🔤 Text extraction and custom formatting for NLP models
-- 📊 Feature normalization matching training-time preprocessing
-- 🎯 Business logic (thresholds, alerts, A/B testing)
-- 🔄 Multi-model ensembles with voting logic
-- 📝 Logging, monitoring, and audit trails
-
-**See working examples:**
-- `examples/pipelines/sentiment_pipeline.py` - HuggingFace text processing
-- `examples/pipelines/sklearn_normalization.py` - Feature normalization
-- `examples/pipelines/simple_test.py` - Minimal template
-
----
-
-## Hugging Face Models
-
-mlship supports Hugging Face Transformers for NLP tasks.
-
-### Download and Serve
-
-```python
-# download_model.py
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
-
-model_name = "distilbert-base-uncased-finetuned-sst-2-english"
-
-model = AutoModelForSequenceClassification.from_pretrained(model_name)
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-
-model.save_pretrained("./sentiment-model")
-tokenizer.save_pretrained("./sentiment-model")
-```
-
-```bash
-# Serve it
-mlship serve sentiment-model/
-```
-
-### Test with Text
-
-```bash
-curl -X POST http://localhost:8000/predict \
-  -H "Content-Type: application/json" \
-  -d '{"features": "This product is amazing!"}'
-
-# Response:
-# {"prediction": "POSITIVE", "probability": 0.9999, "model_name": "sentiment-model"}
-```
-
-**Supported Tasks:**
-- Text classification (sentiment, topic, etc.)
-- Named Entity Recognition (NER)
-- Question Answering
-- Text generation
-- Summarization
-
----
-
-## Performance
-
-### Benchmarks
-
-| Model Type | Load Time | Prediction (avg) | Notes |
-|------------|-----------|------------------|-------|
-| **Scikit-learn** (10 features) | ~50ms | 2-5ms | Fastest |
-| **PyTorch** (small CNN) | ~1s | 10-20ms | CPU inference |
-| **TensorFlow** (Keras model) | ~2s | 15-30ms | CPU inference |
-| **Hugging Face** (DistilBERT) | ~5-10s | 10-15ms | First prediction slower |
-
-**Hardware:** MacBook Pro M1, 16GB RAM, CPU only
-
-### Built-in Optimizations
-
-mlship includes sensible defaults that work out-of-the-box:
-- ✅ **Batch processing** - All loaders support batch inputs efficiently
-- ✅ **Model eval mode** - PyTorch models loaded with `model.eval()`
-- ✅ **CPU-optimized** - HuggingFace uses CPU-optimized pipelines
-- ✅ **Framework defaults** - Leverages sklearn, PyTorch, TensorFlow optimizations
-
-**Note:** mlship is "demo-ready," not production-ready. We intentionally avoid advanced optimizations (quantization, GPU acceleration, advanced batching) to maintain simplicity. For production deployments, consider tools like TorchServe, vLLM, or Triton.
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for design decisions and when to graduate to production tools.
-
----
-
-## Examples
-
-Check the `examples/` directory:
-
-- `examples/sklearn_example.py` - Scikit-learn classification
-- `examples/pytorch_example.py` - PyTorch neural network
-- `examples/huggingface_example.py` - Sentiment analysis with BERT
-
-```bash
-# Run an example
-python examples/sklearn_example.py
-mlship serve fraud_detector.pkl
-```
+See [CONTRIBUTING.md](CONTRIBUTING.md) for custom pipeline documentation.
 
 ---
 
 ## Use Cases
 
-### For Students
-- ✅ Demo ML projects in presentations
-- ✅ Test models interactively
-- ✅ Share models with classmates
-- ✅ No cloud bills or sleeping containers
+**For Students & Learners**
+- Learn model serving without framework-specific tools
+- One tool works for entire ML curriculum (sklearn → PyTorch → transformers)
 
-### For Data Scientists
-- ✅ Quick model validation
-- ✅ Prototype APIs before production
-- ✅ Share models with stakeholders
-- ✅ Test different model versions
+**For Data Scientists**
+- Prototype models locally before production
+- Test models with realistic API interactions
+- Share models with teammates without cloud setup
 
-### For Educators
-- ✅ Teach API concepts without DevOps complexity
-- ✅ Students focus on ML, not deployment
-- ✅ Works offline in classrooms
-- ✅ No infrastructure setup needed
+**For Educators**
+- Teach framework-agnostic model serving concepts
+- Create reproducible examples that work across frameworks
+
+Read [WHY_MLSHIP.md](WHY_MLSHIP.md) for detailed positioning.
 
 ---
 
-## Troubleshooting
+## Documentation
 
-### "Command not found: mlship"
+- **[QUICKSTART.md](QUICKSTART.md)** - Hands-on getting started guide
+- **[WHY_MLSHIP.md](WHY_MLSHIP.md)** - Positioning and comparisons
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development guide
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Technical design
 
-Make sure mlship is installed and in your PATH:
+---
+
+## Installation
 
 ```bash
 pip install mlship
-# or
-uv pip install mlship
-
-# Verify installation
-mlship --version
 ```
 
-### "Framework not detected"
-
-Ensure your model file has the correct extension:
-
+**With specific frameworks:**
 ```bash
-# Scikit-learn
-joblib.dump(model, 'model.pkl')  # or .joblib
-
-# PyTorch
-torch.save(model, 'model.pt')    # or .pth
-
-# TensorFlow
-model.save('model.h5')           # or .keras
+pip install mlship[sklearn]       # scikit-learn
+pip install mlship[pytorch]       # PyTorch
+pip install mlship[tensorflow]    # TensorFlow
+pip install mlship[huggingface]   # HuggingFace
+pip install mlship[all]           # All frameworks
 ```
-
-### "Invalid input shape"
-
-Check your model's expected input features:
-
-```bash
-curl http://localhost:8000/info
-# Look at "input_features" in the response
-```
-
-### Port already in use
-
-Use a different port:
-
-```bash
-mlship serve model.pkl --port 8001
-```
-
----
-
-## Development
-
-### Running Tests
-
-```bash
-# Run all tests
-.venv/bin/python -m pytest
-
-# Run pipeline tests only
-.venv/bin/python -m pytest tests/test_pipelines.py -v
-
-# Run specific framework tests
-.venv/bin/python -m pytest tests/test_pipelines.py::TestSklearnPipeline -v
-.venv/bin/python -m pytest tests/test_pipelines.py::TestPyTorchPipeline -v
-.venv/bin/python -m pytest tests/test_pipelines.py::TestHuggingFacePipeline -v
-
-# Run single test
-.venv/bin/python -m pytest tests/test_pipelines.py::TestSklearnPipeline::test_sklearn_pipeline_preprocess -v
-```
-
-**Useful options:**
-- `-v` - Verbose output
-- `-s` - Show print statements
-- `-x` - Stop on first failure
-- `--no-cov` - Skip coverage report (faster)
-- `--lf` - Run only failed tests from last run
 
 ---
 
@@ -435,55 +164,60 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 - Development setup
 - Running tests
 - Code style guidelines
-- Submitting pull requests
-
----
-
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
-
----
-
-## Documentation
-
-mlship includes focused documentation for different audiences:
-
-| Document | Audience | What's Inside |
-|----------|----------|---------------|
-| **[README.md](README.md)** | End users | Installation, quick start, usage examples, API reference |
-| **[CONTRIBUTING.md](CONTRIBUTING.md)** | Contributors | Development setup, testing, code style, PR process |
-| **[ARCHITECTURE.md](ARCHITECTURE.md)** | Developers | Design philosophy, technical decisions, when to use mlship vs production tools |
-| **[PUBLISHING.md](PUBLISHING.md)** | Maintainers | How to publish releases to PyPI (internal use) |
-
-**New to mlship?** Start with the Quick Start section above.
-**Want to contribute?** Read [CONTRIBUTING.md](CONTRIBUTING.md).
-**Curious about design?** Check [ARCHITECTURE.md](ARCHITECTURE.md).
+- Custom pipeline development
 
 ---
 
 ## Support
 
-- 📖 [Documentation](https://github.com/prabhueshwarla/mlship#readme)
-- 🐛 [Report Issues](https://github.com/prabhueshwarla/mlship/issues)
-- 💬 [Discussions](https://github.com/prabhueshwarla/mlship/discussions)
+- **Issues**: [GitHub Issues](https://github.com/prabhueshwarla/mlship/issues)
+- **Documentation**: See docs linked above
+- **Examples**: Check the `examples/` directory
+
+---
+
+## License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+---
+
+## What Makes mlship Different?
+
+mlship is the **only zero-code tool** that supports sklearn, PyTorch, TensorFlow, AND HuggingFace models with a single command. Read [WHY_MLSHIP.md](WHY_MLSHIP.md) for detailed comparison with transformers-serve, vLLM, Ollama, and BentoML.
+
+**Quick comparison:**
+- ✅ Multi-framework (not just one)
+- ✅ Zero code required (no Python files)
+- ✅ Local-first (no cloud dependency)
+- ✅ HuggingFace Hub integration
+- ✅ Perfect for learning and prototyping
 
 ---
 
 ## Roadmap
 
-- [x] Scikit-learn support
-- [x] PyTorch support
-- [x] TensorFlow support
-- [x] Hugging Face support
-- [x] Cross-platform CI/CD testing
-- [x] Custom preprocessing/postprocessing pipelines
-- [ ] XGBoost support
-- [ ] LightGBM support
-- [ ] GPU inference
-- [ ] Batch prediction optimization
-- [ ] Docker deployment option
+**✅ Implemented:**
+
+- ✅ **Multi-framework support** - sklearn, PyTorch, TensorFlow, HuggingFace
+- ✅ **HuggingFace Hub integration** - Serve models directly from Hub with `--source huggingface`
+- ✅ **Zero-code deployment** - One command to serve any model
+- ✅ **Auto-generated REST API** - With interactive Swagger docs
+- ✅ **Custom pipelines** - Preprocessing/postprocessing support
+- ✅ **Local-first** - Works completely offline (after installation)
+
+**🔄 Planned:**
+
+- 🔄 **PyTorch Hub integration** - Serve models directly from PyTorch Hub with `--source pytorch-hub`
+- 🔄 **TensorFlow Hub integration** - Serve models from TensorFlow Hub with `--source tensorflow-hub`
+- 🔄 **XGBoost & LightGBM support** - First-class support for gradient boosting frameworks
+- 🔄 **Model versioning** - Support specific model versions (e.g., `--revision main`)
+- 🔄 **GPU support** - Automatic GPU detection and utilization
+- 🔄 **Batch inference** - Efficient batch prediction endpoints
+- 🔄 **Authentication** - Optional API key authentication for deployments
+
+Want to contribute? See [CONTRIBUTING.md](CONTRIBUTING.md) or [open an issue](https://github.com/prabhueshwarla/mlship/issues) with your ideas!
 
 ---
 
-**Made with ❤️ for the ML community**
+**Happy serving!** 🚀
