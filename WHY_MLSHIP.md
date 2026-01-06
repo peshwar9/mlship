@@ -162,7 +162,7 @@ mlship is designed for **local development and rapid prototyping**. Consider alt
 - **Interactive demos with UIs** → Use Gradio (built for demos)
 - **High-traffic production APIs** → Use framework-specific optimized servers
 
-mlship excels at getting models into API form quickly and easily. For production, you might graduate to specialized tools—but you'll develop and test locally with mlship first.
+mlship excels at getting models into API form quickly and easily. For production, you might graduate to specialized tools - but you'll develop and test locally with mlship first.
 
 ## Philosophy
 

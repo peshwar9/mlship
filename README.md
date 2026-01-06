@@ -6,7 +6,7 @@
 mlship serve model.pkl
 ```
 
-Deploy your machine learning models locally in seconds—no Docker, no YAML, no configuration files.
+Deploy your machine learning models locally in seconds - no Docker, no YAML, no configuration files.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
