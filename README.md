@@ -30,101 +30,30 @@ Deploy your machine learning models locally in seconds—no Docker, no YAML, no 
 
 ## Quick Start
 
-### Installation
-
-**macOS / Linux:**
 ```bash
-# Using pip (recommended)
+# Install
 pip install mlship
 
-# Using uv (faster alternative)
-curl -LsSf https://astral.sh/uv/install.sh | sh
-uv pip install mlship
-```
-
-**Windows:**
-```powershell
-# Using pip (recommended)
-pip install mlship
-
-# Using uv (faster alternative)
-powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
-uv pip install mlship
-```
-
-### Your First API
-
-**Step 1: Install dependencies**
-
-```bash
-# Install mlship and scikit-learn
-pip install mlship scikit-learn joblib
-```
-
-**Step 2: Create and train a model**
-
-Create a file `train_model.py`:
-
-```python
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.datasets import make_classification
-import joblib
-
-# Train a simple model
-X, y = make_classification(n_samples=100, n_features=4, random_state=42)
-model = RandomForestClassifier(random_state=42)
-model.fit(X, y)
-
-# Save it
-joblib.dump(model, 'model.pkl')
-print('✅ Model saved to model.pkl')
-```
-
-Run it:
-```bash
-python train_model.py
-```
-
-**Step 3: Serve it**
-
-```bash
+# Serve any model
 mlship serve model.pkl
 ```
 
-You'll see:
-```
-🚀 mlship
-   Loading model: model.pkl
-
-🔍 Detecting framework... ✓ sklearn
-📦 Loading model... ✓ Success
-
-📊 Model Information:
-   Name:       model
-   Framework:  sklearn
-   Features:   4
-
-🎉 Server starting!
-   URL:      http://127.0.0.1:8000
-   API Docs: http://127.0.0.1:8000/docs
-```
-
-**Step 4: Test it** (in another terminal)
+### Try HuggingFace Hub Models (No Files Needed!)
 
 ```bash
+# Sentiment analysis
+mlship serve distilbert-base-uncased-finetuned-sst-2-english --source huggingface
+
+# Test it
 curl -X POST http://localhost:8000/predict \
   -H "Content-Type: application/json" \
-  -d '{"features": [1.0, 2.0, 3.0, 4.0]}'
+  -d '{"features": "This product is amazing!"}'
 ```
 
-Response:
-```json
-{"prediction": 0, "probability": 0.87, "model_name": "model"}
-```
-
-### View Interactive Docs
-
-Open http://localhost:8000/docs in your browser for Swagger UI with interactive API testing.
+**📖 See [QUICKSTART.md](QUICKSTART.md) for complete examples** with:
+- HuggingFace models (sentiment, GPT-2, Q&A)
+- Local models (sklearn, PyTorch, TensorFlow)
+- Full curl commands and expected responses
 
 ---
 
@@ -187,172 +116,33 @@ pip install mlship transformers
 
 ---
 
-## Platform-Specific Instructions
+## API Endpoints
 
-### macOS
+Every model gets three endpoints automatically:
 
-**Installation:**
-```bash
-# Install uv (recommended)
-curl -LsSf https://astral.sh/uv/install.sh | sh
+- **POST `/predict`** - Make predictions
+- **GET `/health`** - Health check
+- **GET `/info`** - Model metadata
+- **GET `/docs`** - Interactive API documentation (Swagger UI)
 
-# Install mlship
-uv pip install mlship
-
-# For specific frameworks
-uv pip install mlship[sklearn]      # Scikit-learn
-uv pip install mlship[pytorch]      # PyTorch
-uv pip install mlship[tensorflow]   # TensorFlow
-uv pip install mlship[huggingface]  # Hugging Face
-uv pip install mlship[all]          # All frameworks
-```
-
-**Usage:**
-```bash
-mlship serve model.pkl
-# Server runs at http://127.0.0.1:8000
-```
-
-### Linux
-
-**Ubuntu/Debian:**
-```bash
-# Install Python 3.8+ (if not already installed)
-sudo apt update
-sudo apt install python3 python3-pip
-
-# Install uv
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Install mlship
-uv pip install mlship[all]
-```
-
-**RHEL/CentOS/Fedora:**
-```bash
-# Install Python
-sudo dnf install python3 python3-pip
-
-# Install uv
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Install mlship
-uv pip install mlship[all]
-```
-
-### Windows
-
-**PowerShell (Administrator):**
-```powershell
-# Install Python 3.8+ from https://www.python.org/downloads/
-
-# Install uv
-powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
-
-# Install mlship
-uv pip install mlship[all]
-```
-
-**Usage:**
-```powershell
-mlship serve model.pkl
-# Server runs at http://127.0.0.1:8000
-```
+See [QUICKSTART.md](QUICKSTART.md) for detailed examples and curl commands.
 
 ---
 
-## API Reference
-
-Every deployed model automatically gets:
-
-### Endpoints
-
-#### `POST /predict`
-Make predictions with your model.
-
-**Request:**
-```json
-{
-  "features": [1.0, 2.0, 3.0, 4.0]
-}
-```
-
-**Response (Classification):**
-```json
-{
-  "prediction": 0,
-  "probability": 0.87,
-  "model_name": "fraud_detector"
-}
-```
-
-**Response (Regression):**
-```json
-{
-  "prediction": 42.5,
-  "model_name": "price_predictor"
-}
-```
-
-#### `GET /health`
-Check server health.
-
-**Response:**
-```json
-{
-  "status": "healthy",
-  "model_loaded": true,
-  "model_name": "fraud_detector",
-  "uptime_seconds": 3600
-}
-```
-
-#### `GET /info`
-Get model metadata.
-
-**Response:**
-```json
-{
-  "model_name": "fraud_detector",
-  "model_type": "sklearn.ensemble.RandomForestClassifier",
-  "framework": "scikit-learn",
-  "input_features": 10,
-  "output_type": "classification"
-}
-```
-
-#### `GET /docs`
-Interactive API documentation (Swagger UI).
-
----
-
-## Advanced Usage
-
-### Custom Port
+## Advanced Features
 
 ```bash
+# Custom port
 mlship serve model.pkl --port 5000
-```
 
-### Custom Host
+# Development mode (auto-reload)
+mlship serve model.pkl --reload
 
-```bash
-mlship serve model.pkl --host 0.0.0.0  # Allow external connections
-```
-
-### Custom Model Name
-
-```bash
+# Custom model name
 mlship serve model.pkl --name "fraud-detector"
 ```
 
-### Development Mode (Auto-reload)
-
-```bash
-mlship serve model.pkl --reload
-```
-
-### Custom Preprocessing/Postprocessing Pipelines
+### Custom Pipelines
 
 **What are pipelines?**
 
