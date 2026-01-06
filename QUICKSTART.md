@@ -84,7 +84,9 @@ pip install 'mlship[huggingface]'
 pip install 'mlship[all]'
 ```
 
-**Note:** On **zsh** (macOS default), you must quote the brackets: `'mlship[huggingface]'`
+**Notes:**
+- On **zsh** (macOS default), you must quote the brackets: `'mlship[huggingface]'`
+- **Automatic version check**: If you try to install with Python 3.13, pip will automatically reject the installation with a clear error message. This is expected - just use Python 3.11 or 3.12 as shown in Step 1.
 
 ### Step 4: Verify Installation
 
