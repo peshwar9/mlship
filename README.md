@@ -189,7 +189,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/prabhueshwarla/mlship/issues)
+- **Issues**: [GitHub Issues](https://github.com/sudhanvalabs/mlship/issues)
 - **Documentation**: See docs linked above
 - **Examples**: Check the `examples/` directory
 
@@ -235,7 +235,7 @@ mlship is the **only zero-code tool** that supports sklearn, PyTorch, TensorFlow
 - 🔄 **Batch inference** - Efficient batch prediction endpoints
 - 🔄 **Authentication** - Optional API key authentication for deployments
 
-Want to contribute? See [CONTRIBUTING.md](CONTRIBUTING.md) or [open an issue](https://github.com/prabhueshwarla/mlship/issues) with your ideas!
+Want to contribute? See [CONTRIBUTING.md](CONTRIBUTING.md) or [open an issue](https://github.com/sudhanvalabs/mlship/issues) with your ideas!
 
 ---
 

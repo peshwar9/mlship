@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "mlship"
 version = "0.1.1"
 description = "Turn ML models into APIs with one command"
-authors = [{name = "Prabhu Eshwarla", email = "dev@peshwarla.com"}]
+authors = [{name = "Sudhanva Labs", email = "contact@sudhanvalabs.com"}]
 license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.8"
@@ -64,10 +64,10 @@ dev = [
 mlship = "mlship.cli:cli"
 
 [project.urls]
-Homepage = "https://github.com/prabhueshwarla/mlship"
-Documentation = "https://github.com/prabhueshwarla/mlship#readme"
-Repository = "https://github.com/prabhueshwarla/mlship"
-Issues = "https://github.com/prabhueshwarla/mlship/issues"
+Homepage = "https://github.com/sudhanvalabs/mlship"
+Documentation = "https://github.com/sudhanvalabs/mlship#readme"
+Repository = "https://github.com/sudhanvalabs/mlship"
+Issues = "https://github.com/sudhanvalabs/mlship/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]

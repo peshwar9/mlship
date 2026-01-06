@@ -66,7 +66,7 @@ def detect_framework(model_path: Union[Path, str], source: str = "local") -> str
         f"  • XGBoost: .json, .pkl\n"
         f"  • LightGBM: .txt, .pkl\n\n"
         f"Need support for another format?\n"
-        f"Open an issue: https://github.com/prabhueshwarla/shipml/issues"
+        f"Open an issue: https://github.com/sudhanvalabs/mlship/issues"
     )
 
 

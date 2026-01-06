@@ -106,7 +106,7 @@ mlship --version
 
 ## Step 6: Create GitHub Release
 
-1. Go to https://github.com/prabhueshwarla/mlship/releases/new
+1. Go to https://github.com/sudhanvalabs/mlship/releases/new
 2. Choose the tag you created (v0.1.0)
 3. Title: "mlship v0.1.0"
 4. Description: Copy from CHANGELOG.md (see below)

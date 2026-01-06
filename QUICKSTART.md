@@ -355,7 +355,7 @@ pip install mlship[all]
 - **Production deployment?** See [CONTRIBUTING.md](CONTRIBUTING.md) for best practices
 - **Why mlship?** Read [WHY_MLSHIP.md](WHY_MLSHIP.md) to understand how mlship compares to other tools
 - **Custom pipelines?** Check the full [README.md](README.md) for advanced features
-- **Found a bug?** Report it at [GitHub Issues](https://github.com/prabhueshwarla/mlship/issues)
+- **Found a bug?** Report it at [GitHub Issues](https://github.com/sudhanvalabs/mlship/issues)
 
 ---
 

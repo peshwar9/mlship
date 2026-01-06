@@ -272,7 +272,7 @@ def serve(
         click.echo(f"{type(e).__name__}: {e}", err=True)
         click.echo()
         click.secho(
-            "Please report this issue: https://github.com/prabhueshwarla/shipml/issues",
+            "Please report this issue: https://github.com/sudhanvalabs/mlship/issues",
             fg="yellow",
             err=True,
         )

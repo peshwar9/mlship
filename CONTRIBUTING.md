@@ -9,7 +9,7 @@ Thank you for your interest in contributing to mlship! This guide will help you 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/prabhueshwarla/mlship
+git clone https://github.com/sudhanvalabs/mlship
 cd mlship
 ```
 
@@ -538,8 +538,8 @@ See `PERFORMANCE.md` for current benchmarks.
 
 - Read existing code - it's well-documented
 - Check tests for usage examples
-- Open a [Discussion](https://github.com/prabhueshwarla/mlship/discussions) for questions
-- Open an [Issue](https://github.com/prabhueshwarla/mlship/issues) for bugs
+- Open a [Discussion](https://github.com/sudhanvalabs/mlship/discussions) for questions
+- Open an [Issue](https://github.com/sudhanvalabs/mlship/issues) for bugs
 
 ---
 
