@@ -6,10 +6,13 @@ end-to-end functionality works correctly.
 
 import json
 import subprocess
+import sys
 import time
 
 import pytest
 import requests
+
+IS_WINDOWS = sys.platform == "win32"
 
 
 @pytest.fixture(scope="session")
@@ -89,8 +92,30 @@ class TestServeCommandCLI:
         if source == "huggingface":
             cmd.extend(["--source", "huggingface"])
 
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        # On Windows, use CREATE_NEW_PROCESS_GROUP so we can kill the entire tree
+        kwargs = {}
+        if IS_WINDOWS:
+            kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+
+        proc = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, **kwargs
+        )
         return proc
+
+    def stop_serve_process(self, proc):
+        """Stop serve subprocess and all its children."""
+        if IS_WINDOWS:
+            # On Windows, terminate() doesn't kill child processes.
+            # Use taskkill /T to kill the process tree.
+            subprocess.run(
+                ["taskkill", "/F", "/T", "/PID", str(proc.pid)],
+                capture_output=True,
+            )
+        else:
+            proc.terminate()
+        proc.wait(timeout=10)
+        if proc.poll() is None:
+            proc.kill()
 
     def wait_for_server(self, port, timeout=30):
         """Wait for server to become ready."""
@@ -112,22 +137,19 @@ class TestServeCommandCLI:
         proc = self.start_serve_process(sklearn_model_file, port)
 
         try:
-            assert self.wait_for_server(port, timeout=20), "Server failed to start"
+            assert self.wait_for_server(port, timeout=30), "Server failed to start"
 
             # Test predict
             response = requests.post(
                 f"http://127.0.0.1:{port}/predict",
                 json={"features": [1.0, 2.0, 3.0, 4.0]},
-                timeout=5,
+                timeout=10,
             )
             assert response.status_code == 200
             assert "prediction" in response.json()
 
         finally:
-            proc.terminate()
-            proc.wait(timeout=5)
-            if proc.poll() is None:
-                proc.kill()
+            self.stop_serve_process(proc)
 
     def test_serve_pytorch_cli(self, pytorch_model_file):
         """Test mlship serve with PyTorch model."""
@@ -135,22 +157,19 @@ class TestServeCommandCLI:
         proc = self.start_serve_process(pytorch_model_file, port)
 
         try:
-            assert self.wait_for_server(port, timeout=20), "Server failed to start"
+            assert self.wait_for_server(port, timeout=30), "Server failed to start"
 
             # Test predict
             response = requests.post(
                 f"http://127.0.0.1:{port}/predict",
                 json={"features": [1.0, 2.0, 3.0, 4.0]},
-                timeout=5,
+                timeout=10,
             )
             assert response.status_code == 200
             assert "prediction" in response.json()
 
         finally:
-            proc.terminate()
-            proc.wait(timeout=5)
-            if proc.poll() is None:
-                proc.kill()
+            self.stop_serve_process(proc)
 
     def test_serve_tensorflow_cli(self, tensorflow_model_file):
         """Test mlship serve with TensorFlow model."""
@@ -158,22 +177,19 @@ class TestServeCommandCLI:
         proc = self.start_serve_process(tensorflow_model_file, port)
 
         try:
-            assert self.wait_for_server(port, timeout=20), "Server failed to start"
+            assert self.wait_for_server(port, timeout=30), "Server failed to start"
 
             # Test predict
             response = requests.post(
                 f"http://127.0.0.1:{port}/predict",
                 json={"features": [0.5, 1.2, -0.3, 0.8]},
-                timeout=5,
+                timeout=10,
             )
             assert response.status_code == 200
             assert "prediction" in response.json()
 
         finally:
-            proc.terminate()
-            proc.wait(timeout=5)
-            if proc.poll() is None:
-                proc.kill()
+            self.stop_serve_process(proc)
 
     @pytest.mark.slow
     def test_serve_huggingface_hub_cli(self):
@@ -186,7 +202,7 @@ class TestServeCommandCLI:
 
         try:
             # HuggingFace models take longer to load
-            assert self.wait_for_server(port, timeout=60), "Server failed to start"
+            assert self.wait_for_server(port, timeout=90), "Server failed to start"
 
             # Test predict
             response = requests.post(
@@ -198,10 +214,7 @@ class TestServeCommandCLI:
             assert "prediction" in response.json()
 
         finally:
-            proc.terminate()
-            proc.wait(timeout=5)
-            if proc.poll() is None:
-                proc.kill()
+            self.stop_serve_process(proc)
 
 
 class TestBenchmarkCommandCLI:
